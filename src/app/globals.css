@@ -1,26 +1,508 @@
 @import "tailwindcss";
 
+/*
+ * Atelier design system
+ * ---------------------
+ * A restrained, editorial, near-monochrome system for a luxury storefront:
+ * - imagery carries the color; the UI stays black / white / warm greys
+ * - small, tracked, uppercase sans for navigation, labels and buttons
+ * - a refined serif reserved for display headings
+ * - square corners, 1px hairlines, generous whitespace
+ *
+ * Tokens live in @theme (they generate Tailwind utilities such as
+ * bg-ink, text-muted, border-line, font-display, text-label, max-w-page).
+ * Responsive layout values (gutters, section spacing, header height) are
+ * CSS variables on :root that change at breakpoints, so every primitive
+ * that reads them adapts automatically.
+ */
+
+/* ------------------------------------------------------------------ */
+/* Tokens                                                             */
+/* ------------------------------------------------------------------ */
+
+@theme {
+  /* Color: neutrals do all the work; status colors are muted. */
+  --color-paper: #ffffff; /* page background */
+  --color-canvas: #f6f5f3; /* product image backdrop, subtle panels */
+  --color-ink: #1b1b1b; /* primary text, primary buttons */
+  --color-ink-soft: #3a3a3a; /* primary button hover */
+  --color-muted: #6f6f6f; /* secondary text, meta */
+  --color-subtle: #a3a3a3; /* placeholders, disabled text */
+  --color-line: #e4e2df; /* hairline dividers, card borders */
+  --color-line-strong: #1b1b1b; /* outlined buttons, focused inputs */
+  --color-overlay: rgb(0 0 0 / 0.4); /* scrims behind drawers/modals */
+  --color-sale: #8c1d18; /* price reductions */
+  --color-error: #b3261e;
+  --color-success: #2f5d3a;
+
+  /* Type families (font variables are set in src/app/layout.tsx). */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-cormorant), ui-serif, Georgia, serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  /*
+   * Type scale. Small UI text is uppercase and tracked; body is compact;
+   * display sizes are fluid so headings scale with the viewport.
+   */
+  --text-caption: 0.6875rem; /* 11px: badges, legal, meta */
+  --text-caption--line-height: 1.4;
+  --text-caption--letter-spacing: 0.08em;
+
+  --text-label: 0.75rem; /* 12px: nav, buttons, eyebrows */
+  --text-label--line-height: 1.33;
+  --text-label--letter-spacing: 0.1em;
+
+  --text-body-sm: 0.8125rem; /* 13px: product card name/price */
+  --text-body-sm--line-height: 1.5;
+
+  --text-body: 0.875rem; /* 14px: default body copy */
+  --text-body--line-height: 1.6;
+
+  --text-body-lg: 1rem; /* 16px: long-form copy */
+  --text-body-lg--line-height: 1.65;
+
+  --text-heading-sm: 1.25rem; /* 20px */
+  --text-heading-sm--line-height: 1.3;
+
+  --text-heading: clamp(1.5rem, 1.2rem + 1.2vw, 2rem); /* 24 → 32px */
+  --text-heading--line-height: 1.2;
+
+  --text-display: clamp(2rem, 1.4rem + 2.6vw, 3.5rem); /* 32 → 56px */
+  --text-display--line-height: 1.08;
+  --text-display--letter-spacing: -0.01em;
+
+  --text-display-lg: clamp(2.5rem, 1.5rem + 4.4vw, 5rem); /* 40 → 80px */
+  --text-display-lg--line-height: 1.02;
+  --text-display-lg--letter-spacing: -0.015em;
+
+  --tracking-label: 0.1em;
+  --tracking-wide-label: 0.16em;
+
+  /* Containers (max-w-page, max-w-content, max-w-prose-narrow). */
+  --container-page: 90rem; /* 1440px: full storefront width */
+  --container-content: 75rem; /* 1200px: editorial sections */
+  --container-prose-narrow: 40rem; /* 640px: text blocks, forms */
+
+  /* Shape: square by default. */
+  --radius-none: 0;
+  --radius-pill: 999px; /* only for swatches / icon-only toggles */
+
+  /* Media */
+  --aspect-product: 4 / 5;
+  --aspect-editorial: 3 / 4;
+  --aspect-hero: 16 / 9;
+
+  /* Motion: quiet and quick. */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 600ms; /* image hover zoom */
+}
+
+/* ------------------------------------------------------------------ */
+/* Responsive layout variables                                        */
+/* Breakpoints match Tailwind's defaults: md 48rem, lg 64rem, xl 80rem */
+/* ------------------------------------------------------------------ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --gutter: 1rem; /* page side padding */
+  --grid-gap-x: 0.5rem; /* product grid column gap */
+  --grid-gap-y: 2rem; /* product grid row gap */
+  --section-y: 3rem; /* vertical rhythm between page sections */
+  --header-h: 3.5rem;
+  --border-hairline: 1px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@media (width >= 48rem) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --gutter: 1.5rem;
+    --grid-gap-x: 0.75rem;
+    --grid-gap-y: 2.5rem;
+    --section-y: 4.5rem;
+    --header-h: 4rem;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@media (width >= 80rem) {
+  :root {
+    --gutter: 2.5rem;
+    --grid-gap-x: 1rem;
+    --grid-gap-y: 3rem;
+    --section-y: 6rem;
+    --header-h: 4.5rem;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Base                                                               */
+/* ------------------------------------------------------------------ */
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    scroll-padding-top: var(--header-h);
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    text-wrap: balance;
+  }
+
+  h4,
+  h5,
+  h6 {
+    font-weight: 500;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Links are quiet by default: inherit color, underline on hover. */
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  hr {
+    border: 0;
+    border-top: var(--border-hairline) solid var(--color-line);
+  }
+
+  ::selection {
+    background-color: var(--color-ink);
+    color: var(--color-paper);
+  }
+
+  :focus-visible {
+    outline: 1px solid var(--color-ink);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Layout primitives                                                  */
+/* ------------------------------------------------------------------ */
+
+/* Full-width page container with responsive side gutters. */
+@utility container-page {
+  width: 100%;
+  max-width: var(--container-page);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* Narrower container for editorial/text-led sections. */
+@utility container-content {
+  width: 100%;
+  max-width: calc(var(--container-content) + var(--gutter) * 2);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* Edge-to-edge (no gutters): hero imagery, full-bleed banners. */
+@utility container-bleed {
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
+  padding-inline: 0;
+}
+
+/* Vertical section rhythm. */
+@utility section-y {
+  padding-block: var(--section-y);
+}
+
+@utility section-y-sm {
+  padding-block: calc(var(--section-y) / 2);
+}
+
+/* Stack: vertical flow with a consistent gap (override with gap-*). */
+@utility stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Cluster: wrapping horizontal group (nav items, filters, actions). */
+@utility cluster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Product listing grid: 2 → 3 → 4 columns. */
+@utility grid-products {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: var(--grid-gap-x);
+  row-gap: var(--grid-gap-y);
+
+  @media (width >= 64rem) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  @media (width >= 80rem) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Editorial split: stacked on mobile, two columns from md. */
+@utility grid-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--grid-gap-x);
+
+  @media (width >= 48rem) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Offset content below a sticky header. */
+@utility pt-header {
+  padding-top: var(--header-h);
+}
+
+@utility h-header {
+  height: var(--header-h);
+}
+
+/* ------------------------------------------------------------------ */
+/* Typography primitives                                              */
+/* ------------------------------------------------------------------ */
+
+/* Small uppercase tracked label: nav, eyebrows, buttons, filters. */
+@utility eyebrow {
+  font-family: var(--font-sans);
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  font-weight: 500;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+@utility meta {
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+}
+
+/* ------------------------------------------------------------------ */
+/* Media primitives                                                   */
+/* ------------------------------------------------------------------ */
+
+/* Product image frame: neutral backdrop, fixed ratio, slow hover zoom. */
+@utility media-product {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: var(--aspect-product);
+  background-color: var(--color-canvas);
+
+  & > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--duration-slow) var(--ease-standard);
+  }
+
+  @media (hover: hover) {
+    &:hover > img {
+      transform: scale(1.03);
+    }
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Borders                                                            */
+/* ------------------------------------------------------------------ */
+
+@utility hairline {
+  border: var(--border-hairline) solid var(--color-line);
+}
+
+@utility hairline-t {
+  border-top: var(--border-hairline) solid var(--color-line);
+}
+
+@utility hairline-b {
+  border-bottom: var(--border-hairline) solid var(--color-line);
+}
+
+/* ------------------------------------------------------------------ */
+/* Buttons                                                            */
+/* Square, uppercase, tracked. Heights: sm 40px, md 48px, lg 56px.    */
+/* Usage: class="btn btn-primary" | "btn btn-secondary btn-lg" etc.   */
+/* ------------------------------------------------------------------ */
+
+@layer components {
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 3rem;
+    padding-inline: 2rem;
+    border: var(--border-hairline) solid transparent;
+    border-radius: 0;
+    font-family: var(--font-sans);
+    font-size: var(--text-label);
+    line-height: 1;
+    font-weight: 500;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    transition:
+      background-color var(--duration-fast) var(--ease-standard),
+      color var(--duration-fast) var(--ease-standard),
+      border-color var(--duration-fast) var(--ease-standard);
+
+    &:disabled,
+    &[aria-disabled="true"] {
+      cursor: not-allowed;
+      opacity: 0.4;
+      pointer-events: none;
+    }
+  }
+
+  .btn-sm {
+    min-height: 2.5rem;
+    padding-inline: 1.25rem;
+  }
+
+  .btn-lg {
+    min-height: 3.5rem;
+    padding-inline: 2.5rem;
+  }
+
+  .btn-block {
+    width: 100%;
+  }
+
+  /* Solid black: the single main action on a view (add to bag, checkout). */
+  .btn-primary {
+    background-color: var(--color-ink);
+    border-color: var(--color-ink);
+    color: var(--color-paper);
+
+    &:hover {
+      background-color: var(--color-ink-soft);
+      border-color: var(--color-ink-soft);
+    }
+  }
+
+  /* Outlined: secondary actions; fills on hover. */
+  .btn-secondary {
+    background-color: transparent;
+    border-color: var(--color-line-strong);
+    color: var(--color-ink);
+
+    &:hover {
+      background-color: var(--color-ink);
+      color: var(--color-paper);
+    }
+  }
+
+  /* Inverse: for use on dark imagery. */
+  .btn-inverse {
+    background-color: var(--color-paper);
+    border-color: var(--color-paper);
+    color: var(--color-ink);
+
+    &:hover {
+      background-color: transparent;
+      color: var(--color-paper);
+    }
+  }
+
+  /* Text-only button that looks like an underlined label. */
+  .btn-ghost {
+    min-height: auto;
+    padding-inline: 0;
+    background: none;
+    color: var(--color-ink);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.35em;
+
+    &:hover {
+      text-decoration-color: transparent;
+    }
+  }
+
+  /* Square icon-only button (search, bag, menu). */
+  .btn-icon {
+    min-height: 2.5rem;
+    width: 2.5rem;
+    padding: 0;
+    background: none;
+    color: var(--color-ink);
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* Links                                                            */
+  /* ---------------------------------------------------------------- */
+
+  /* Inline link in body copy: always underlined, fades on hover. */
+  .link {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+    text-decoration-color: currentColor;
+    transition: text-decoration-color var(--duration-fast) var(--ease-standard);
+
+    &:hover {
+      text-decoration-color: transparent;
+    }
+  }
+
+  /* Nav / quiet link: no underline until hover. */
+  .link-quiet {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.35em;
+    text-decoration-color: transparent;
+    transition: text-decoration-color var(--duration-fast) var(--ease-standard);
+
+    &:hover,
+    &[aria-current="page"] {
+      text-decoration-color: currentColor;
+    }
+  }
+
+  /* Muted link for footers and meta rows. */
+  .link-muted {
+    color: var(--color-muted);
+    transition: color var(--duration-fast) var(--ease-standard);
+
+    &:hover {
+      color: var(--color-ink);
+    }
+  }
 }

@@ -8,6 +8,13 @@
       "when": 1795444095168,
       "tag": "0000_products_categories_stock",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1795596003389,
+      "tag": "0001_auth",
+      "breakpoints": true
     }
   ]
 }

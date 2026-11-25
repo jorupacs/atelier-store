@@ -12,7 +12,10 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx --env-file=.env src/db/seed.ts",
-    "auth:generate": "npx @better-auth/cli generate --config src/lib/auth.ts --output src/db/schema.ts",
+    "auth:role": "tsx --env-file=.env src/db/set-role.ts",
+    "auth:generate": "npx auth@1.7.27 generate --config src/lib/auth.ts --output src/db/auth-schema.ts",
+    "test:auth": "tsx --env-file=.env --test --test-concurrency=1 scripts/verify-auth.ts",
+    "test:cart": "tsx --env-file=.env --test --test-concurrency=1 scripts/verify-cart.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

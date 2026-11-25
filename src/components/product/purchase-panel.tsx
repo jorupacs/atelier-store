@@ -1,19 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
+import { useLayoutEffect, useState, useTransition } from "react";
 
+import { addToCart, type CartResult } from "@/app/bag/actions";
+import { notifyCartChange } from "@/components/cart/use-cart-count";
 import { getStockState, type Product } from "@/lib/products";
 
-type Props = Pick<Product, "name" | "stock" | "sizes">;
+type Props = Pick<Product, "id" | "name" | "stock" | "sizes">;
 
-/**
- * Size selection and add-to-bag.
- * UI only: the bag/cart is not implemented yet, so adding shows a confirmation.
- */
-export function PurchasePanel({ name, stock, sizes }: Props) {
+type Status = "idle" | "needs_size" | "added" | "failed" | "notify";
+
+/** Size selection and add-to-bag. The server checks stock and sets the price. */
+export function PurchasePanel({ id, name, stock, sizes }: Props) {
   const soldOut = getStockState({ stock }).status === "out_of_stock";
   const [size, setSize] = useState<string | null>(null);
-  const [status, setStatus] = useState<"idle" | "needs_size" | "added" | "notify">("idle");
+  const [status, setStatus] = useState<Status>("idle");
+  const [error, setError] = useState("");
+  const [pending, startTransition] = useTransition();
+
+  // Next keeps this page mounted but hidden after leaving it. Don't come back to
+  // an old confirmation.
+  useLayoutEffect(() => () => setStatus("idle"), []);
 
   const needsSize = !!sizes?.length;
 
@@ -22,7 +30,23 @@ export function PurchasePanel({ name, stock, sizes }: Props) {
       setStatus("needs_size");
       return;
     }
-    setStatus("added");
+    if (pending) return;
+    setStatus("idle");
+    startTransition(async () => {
+      let result: CartResult;
+      try {
+        result = await addToCart(id, size);
+      } catch {
+        result = { ok: false, error: "Something went wrong. Please try again." };
+      }
+      notifyCartChange();
+      const message = result.ok ? "" : result.error;
+      // State set after an await needs its own transition.
+      startTransition(() => {
+        setError(message);
+        setStatus(message ? "failed" : "added");
+      });
+    });
   };
 
   return (
@@ -82,13 +106,27 @@ export function PurchasePanel({ name, stock, sizes }: Props) {
           </button>
         </div>
       ) : (
-        <button type="button" className="btn btn-primary btn-lg btn-block" onClick={addToBag}>
-          Add to bag
+        <button
+          type="button"
+          aria-disabled={pending}
+          className="btn btn-primary btn-lg btn-block aria-disabled:opacity-70"
+          onClick={addToBag}
+        >
+          {pending ? "Adding…" : "Add to bag"}
         </button>
       )}
 
       <p className="text-body-sm" role="status">
-        {status === "added" && `${name}${size ? `, size ${size},` : ""} added to your bag.`}
+        {status === "added" && (
+          <>
+            {name}
+            {size && `, size ${size},`} added to your bag.{" "}
+            <Link href="/bag" className="link">
+              View bag
+            </Link>
+          </>
+        )}
+        {status === "failed" && <span className="text-error">{error}</span>}
         {status === "notify" && "We'll let you know when it's back in stock."}
       </p>
     </div>

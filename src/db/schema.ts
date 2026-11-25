@@ -1,7 +1,7 @@
 // Drizzle schema entry point.
 //
-// Better Auth tables (user, session, account, verification) can be generated with:
-//   npm run auth:generate
+// The Better Auth tables (user, session, account, verification) are generated
+// into ./auth-schema.ts. Regenerate with `npm run auth:generate`; don't edit it.
 
 import { relations, sql } from "drizzle-orm";
 import {
@@ -18,6 +18,8 @@ import {
 } from "drizzle-orm/pg-core";
 
 import type { ProductImage } from "@/lib/products";
+
+export * from "./auth-schema";
 
 const timestamps = {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

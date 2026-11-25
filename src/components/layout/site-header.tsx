@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import { BagIcon, CloseIcon, MenuIcon, SearchIcon, UserIcon } from "@/components/icons";
+import { BagLink } from "@/components/cart/bag-link";
+import { CloseIcon, MenuIcon, SearchIcon, UserIcon } from "@/components/icons";
 import { navigation } from "@/lib/catalog";
 
 export function SiteHeader() {
@@ -66,9 +67,7 @@ export function SiteHeader() {
           <Link href="/account" className="btn btn-icon hidden sm:inline-flex" aria-label="Account">
             <UserIcon />
           </Link>
-          <Link href="/bag" className="btn btn-icon" aria-label="Shopping bag">
-            <BagIcon />
-          </Link>
+          <BagLink />
         </div>
       </div>
 

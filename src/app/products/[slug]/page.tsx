@@ -102,7 +102,12 @@ async function ProductDetail({ params }: { params: Params }) {
                 <StockIndicator product={product} />
               </div>
 
-              <PurchasePanel name={product.name} stock={product.stock} sizes={product.sizes} />
+              <PurchasePanel
+                id={product.id}
+                name={product.name}
+                stock={product.stock}
+                sizes={product.sizes}
+              />
 
               <ul className="meta stack gap-1.5">
                 <li>Complimentary express shipping and returns</li>
